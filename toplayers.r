@@ -32,8 +32,6 @@ fix.full<-cbind(fulll,full.1)
 kmean.full<-kmeans(fix.full[,c(2,15:length(fix.full))],centers=5)
 ggplot(fix.full,aes(x=position,y=num_touches))+geom_point(color=kmean.full$cluster,group=kmean.full$cluster)
 
-
-fix.full[fix.full$full_name %in% top,]
 fix.full[fix.full$full_name %in% top,26]<-1
 colnames(fix.full)[26] <- "top"
 
@@ -47,7 +45,7 @@ forward<-fix.full[fix.full$position==2,]
 mean.height.2<-mean(forward$height,na.rm=TRUE)
 mean.weight.2<-mean(forward$weight,na.rm=TRUE)
 forward[is.na(forward$height),3]<-mean.height.2
-forward[is.na(forward$weight),4]<-mean.weigh.2
+forward[is.na(forward$weight),4]<-mean.weight.2
 
 goal<-fix.full[fix.full$position==3,]
 mean.height.3<-mean(goal$height,na.rm=TRUE)
