@@ -17,7 +17,7 @@ ggplot(fix.ten.premier,aes(x=num_appearances,y=num_touches))+geom_point()+geom_t
 eight<-read.csv("8_2010_features.csv")
 twentyone<-read.csv("21_2010_features.csv")
 twentytwo<-read.csv("22_2010_features.csv")
-twentythree<-read.csv("22_2010_features.csv")
+twentythree<-read.csv("23_2010_features.csv")
 merge=rbind.fill(eight,twentyone,twentytwo,twentythree)
 merge$position= as.character(merge$position)
 merge$position [ merge$position  == "Defender" ] <- "1"
