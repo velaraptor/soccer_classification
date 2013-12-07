@@ -25,10 +25,14 @@ merge$position [ merge$position  == "Midfielder" ] <- "4"
 merge$position [ merge$position  == "Player" ] <- "5"
 merge$position= as.numeric(merge$position)
 full<-merge[,c(1:14,45:64)]
-full.1<-full[,c(15:length(tenpremier))]
+full.1<-full[,c(15:length(full))]
 full.1[is.na(full.1)]<-0
+fulll<-full[,1:14]
+fix.full<-cbind(fulll,full.1)
 kmean.full<-kmeans(fix.full[,c(2,15:length(fix.full))],centers=5)
 ggplot(fix.full,aes(x=position,y=num_touches))+geom_point(color=kmean.full$cluster,group=kmean.full$cluster)
+
+
 fix.full[fix.full$full_name %in% top,]
 fix.full[fix.full$full_name %in% top,26]<-1
 colnames(fix.full)[26] <- "top"
@@ -62,3 +66,4 @@ mean.height.5<-mean(player$height,na.rm=TRUE)
 mean.weight.5<-mean(player$weight,na.rm=TRUE)
 player[is.na(player$height),3]<-mean.height.5
 player[is.na(player$weight),4]<-mean.weight.5
+fix.merge<-rbind.fill(defender,forward,goal,mid,player)
