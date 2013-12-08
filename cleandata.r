@@ -1,9 +1,9 @@
 ## IF YOU GUYS COULD START DOING THIS FOR EACH CSV FILE. WOULD BE GREAT
-Chris-8_2010,21_2010,22_2010
-Ali-8_2012,21_2012,23_2012,98_2011
-Yuanda-22_2012,98_2012,23_2010
+##Chris-8_2010,21_2010,22_2010
+##Ali-8_2012,21_2012,23_2012,98_2011
+##Yuanda-22_2012,98_2012,23_2010
 
-Remember for 2012 files, the read.csv("top50_2012.csv")
+##Remember for 2012 files, the read.csv("top50_2012.csv")
 
 library(plyr)
 library(ggplot2)
