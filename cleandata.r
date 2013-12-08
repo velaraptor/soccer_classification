@@ -79,3 +79,6 @@ plot(1:15, wss, type="b", xlab="Number of Clusters",ylab="Within groups sum of s
 set.seed(25)
 k<-kmeans(fix.merge.1[,c(2:5,15:(length(fix.merge)-1))],,centers=6)
 fix.merge.1[k$cluster==1,35]
+fix.merge.1[k$cluster==2,35]
+fix.merge.1[k$cluster==3,35]
+
