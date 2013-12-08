@@ -13,7 +13,7 @@ ggplot(fix.ten.premier,aes(x=num_fouls_conceded,y=num_aerial_duels))+geom_point(
 ggplot(fix.ten.premier,aes(x=num_appearances,y=mins_played))+geom_point()+geom_text(aes(label=full_name),hjust=0, vjust=0,size=2)
 ggplot(fix.ten.premier,aes(x=num_appearances,y=num_touches))+geom_point()+geom_text(aes(label=full_name),hjust=0, vjust=0,size=2)
 ##IM DOING 2010 First
-
+ 
 eight<-read.csv("8_2010_features.csv")
 twentyone<-read.csv("21_2010_features.csv")
 twentytwo<-read.csv("22_2010_features.csv")
