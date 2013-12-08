@@ -9,7 +9,10 @@ library(plyr)
 library(ggplot2)
 top<-read.csv("top50_2010.csv")
 top<-top[,1]
+
 eight<-read.csv("8_2010_features.csv")
+
+##Make position a number instead of category
 eight$position= as.character(eight$position)
 eight$position [ eight$position  == "Defender" ] <- "1"
 eight$position [ eight$position  == "Forward" ] <- "2"
@@ -17,13 +20,19 @@ eight$position [ eight$position  == "Goalkeeper" ] <- "3"
 eight$position [ eight$position  == "Midfielder" ] <- "4"
 eight$position [ eight$position  == "Player" ] <- "5"
 eight$position= as.numeric(eight$position)
+
+##clean data to include FIFA, and features that are relevant, and include zeros to features with NA
 full<-eight[,c(1:14,45:64)]
 full.1<-full[,c(15:length(full))]
 full.1[is.na(full.1)]<-0
 fulll<-full[,1:14]
 fix.full<-cbind(fulll,full.1)
+
+##add top indicator variable
 fix.full[fix.full$full_name %in% top,35]<-1
 colnames(fix.full)[35] <- "top"
+
+##fix all the height, weight, and age to means for each position
 defender<-fix.full[fix.full$position==1,]
 mean.height<-mean(defender$height,na.rm=TRUE)
 mean.age<-mean(defender$age,na.rm=TRUE)
@@ -56,28 +65,27 @@ mid[is.na(mid$height),3]<-mean.height.4
 mid[is.na(mid$weight),4]<-mean.weight.4
 mid[is.na(mid$age),5]<-mean.age.4
 
-player<-fix.full[fix.full$position==5,]
-mean.height.5<-mean(player$height,na.rm=TRUE)
-mean.weight.5<-mean(player$weight,na.rm=TRUE)
-mean.age.5<-mean(player$age,na.rm=TRUE)
-player[is.na(player$height),3]<-mean.height.5
-player[is.na(player$weight),4]<-mean.weight.5
-player[is.na(player$age),5]<-mean.age.5
-fix.merge<-rbind.fill(defender,forward,goal,mid,player)
-rows<-as.numeric(rownames(fix.merge[fix.merge[,2]==5,]))
-fix.merge<-fix.merge[-rows,]
+##It's better not to include type player because there is no data on their height, weight, and we don't know who they are. 
+
+##merge all the cleaned data
+fix.merge<-rbind.fill(defender,forward,goal,mid)
+##put features as rate by minute
 byminutes.data<-fix.merge[,c(15,17:34)]/fix.merge$mins_played
+##put the rate into the new dataset
 fix.merge.1<-cbind(fix.merge[1:14],fix.merge$mins_played,byminutes.data,fix.merge$top)
 
+##Find Optimal K-means, FYI NOT USING FIFA DATA YET, also Twitter followers could be helpful for this too
 wss<-as.data.frame(NA,nrow=14,ncol=1)
  for (i in 2:15){
  	wss[i] <- sum(kmeans(fix.merge.1[,c(2:5,15:(length(fix.merge)-1))],,centers=i)$withinss)
  	}
 plot(1:15, wss, type="b", xlab="Number of Clusters",ylab="Within groups sum of squares")
 ## FOR THIS DATA 6 was the best one, look at when it bends
-##THE CENTER MIGHT BE DIFFERENT FOR THIS, I PUT SIX
+##THE CENTER MIGHT BE DIFFERENT FOR THIS, I PUT SIX, noticed with the 2010 data, that it is optimal near 6-8 clusters
 set.seed(25)
 k<-kmeans(fix.merge.1[,c(2:5,15:(length(fix.merge)-1))],,centers=6)
+
+##to check where the 'popular' people are based on top data
 fix.merge.1[k$cluster==1,35]
 fix.merge.1[k$cluster==2,35]
 fix.merge.1[k$cluster==3,35]
