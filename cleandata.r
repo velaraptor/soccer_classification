@@ -73,6 +73,9 @@ fix.merge<-rbind.fill(defender,forward,goal,mid)
 byminutes.data<-fix.merge[,c(15,17:34)]/fix.merge$mins_played
 ##put the rate into the new dataset
 fix.merge.1<-cbind(fix.merge[1:14],fix.merge$mins_played,byminutes.data,fix.merge$top)
+## FOR SECOND TIME STOP HERE
+## training the data, a dummy variable
+fix.merge.1[is.na(fix.merge.1)]<-0
 
 ##Find Optimal K-means, FYI NOT USING FIFA DATA YET, also Twitter followers could be helpful for this too
 wss<-as.data.frame(NA,nrow=14,ncol=1)
@@ -83,10 +86,22 @@ plot(1:15, wss, type="b", xlab="Number of Clusters",ylab="Within groups sum of s
 ## FOR THIS DATA 6 was the best one, look at when it bends
 ##THE CENTER MIGHT BE DIFFERENT FOR THIS, I PUT SIX, noticed with the 2010 data, that it is optimal near 6-8 clusters
 set.seed(25)
-k<-kmeans(fix.merge.1[,c(2:5,15:(length(fix.merge)-1))],,centers=6)
+k<-kmeans(fix.merge.1[,c(2:5,15:(length(fix.merge)))],,centers=7)
+k
+notpopular<-fix.merge.1[k$cluster==2,1]
 
 ##to check where the 'popular' people are based on top data
 fix.merge.1[k$cluster==1,35]
 fix.merge.1[k$cluster==2,35]
 fix.merge.1[k$cluster==3,35]
+
+
+
+##so read file
+write.csv(notpopular,"notpopular.csv")
+
+## for 2nd time
+not<-read.csv("notpopular.csv")
+fix.merge.1[not,35]<-0
+##figure out how to subset data with 0 and 1s, and create a model, ridge, randomforest
 
