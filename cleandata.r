@@ -126,7 +126,84 @@ k.1<-kmeans(pred.3[,c(2:5,15:(length(pred.3)))],centers=4,algorithm="Lloyd")
  
  
 k.1<-kmeans(pred.3[,c(2:5,15:(length(pred.3)))],centers=4,algorithm="Lloyd")
-##change cluster 3 score to .75
-##use cluster 4 score
-##use orginal train for 0
-##and fix cluster with top player to 1 and then train the data, and test it, then test for other seasons based on this metric 
+
+
+pred.3[k.1$cluster==3,35]<-.75
+pred.3[k.1$cluster==1,35]<-.25
+pred.3[pred.3$full_name %in% top,35]<-1
+
+
+library(caret)
+inTraining <- createDataPartition(pred.3$top, p = 0.75, list = FALSE)
+training<-pred.3[inTraining,]
+testing<-pred.3[-inTraining,]
+fitControl<-trainControl(method="repeatedcv",number=10,repeats=10)
+set.seed(800)
+libary(gbm)
+gbm.1<-train(top~position+height+weight+age+mins_played+num_touches+num_touches_2st_third+num_appearances+num_touches_3st_third+num_tackles_attempted+num_shots+num_touches_1st_third+num_fouls_conceded+num_fouls_won+num_yellow_cards+num_aerial_successes+num_headed_shots+num_aerial_duels+num_headed_on_target+num_shots_on_target+num_goals+num_penalties_scored+num_red_cards+num_set_play_goals,method="gbm",trControl=fitControl,verbose=FALSE)
+gbm.predict<-predict(gbm.1,testing)
+gbm.data<-data.frame(testing[,c(1:length(fix.merge.1)-1)],gbm.predict)
+ggplot(gbm.data,aes(x=mins_played,y=num_touches,color=gbm.predict))+geom_point()+scale_colour_gradientn(colours=rainbow(2))
+gbm.predict.1<-predict(gbm.1,new.test)
+gbm.data.1<-data.frame(new.test[,c(1:length(fix.merge.1)-1)],gbm.predict.1)
+
+
+
+
+
+twotwo.2012<-read.csv("22_2012_features.csv")
+twotwo.2012$position= as.character(twotwo.2012$position)
+twotwo.2012$position [ twotwo.2012$position  == "Defender" ] <- "1"
+twotwo.2012$position [ twotwo.2012$position  == "Forward" ] <- "2"
+twotwo.2012$position [ twotwo.2012$position  == "Goalkeeper" ] <- "3"
+twotwo.2012$position [ twotwo.2012$position  == "Midfielder" ] <- "4"
+twotwo.2012$position [ twotwo.2012$position  == "Player" ] <- "5"
+twotwo.2012$position= as.factor(twotwo.2012$position)
+
+full.2012<-eight[,c(1:14,45:64)]
+full.12<-full.2012[,c(15:length(full.2012))]
+full.12[is.na(full.12)]<-0
+fulll.1<-full.2012[,1:14]
+fix.full.1<-cbind(fulll.1,full.12)
+
+defender.1<-fix.full.1[fix.full.1$position==1,]
+mean.height.2012<-mean(defender.1$height,na.rm=TRUE)
+mean.age.2012<-mean(defender.1$age,na.rm=TRUE)
+mean.weight.2012<-mean(defender.1$weight,na.rm=TRUE)
+defender.1[is.na(defender.1$height),3]<-mean.height.2012
+defender.1[is.na(defender.1$weight),4]<-mean.weight.2012
+defender.1[is.na(defender.1$age),5]<-mean.age.2012
+
+forward.1<-fix.full.1[fix.full.1$position==2,]
+mean.height.2012.4<-mean(forward.1$height,na.rm=TRUE)
+mean.weight.2012.4<-mean(forward.1$weight,na.rm=TRUE)
+mean.age.2012.4<-mean(forward.1$age,na.rm=TRUE)
+forward.1[is.na(forward.1$height),3]<-mean.height.2012.4
+forward.1[is.na(forward.1$weight),4]<-mean.weight.2012.4
+forward.1[is.na(forward.1$age),5]<-mean.age.2012.4
+
+goal.1<-fix.full.1[fix.full.1$position==3,]
+mean.height.2012.1<-mean(goal.1$height,na.rm=TRUE)
+mean.weight.2012.1<-mean(goal.1$weight,na.rm=TRUE)
+mean.age.2012.1<-mean(goal.1$age,na.rm=TRUE)
+goal.1[is.na(goal.1$height),3]<-mean.height.2012.1
+goal.1[is.na(goal.1$weight),4]<-mean.weight.2012.1
+goal.1[is.na(goal.1$age),5]<-mean.age.2012.1
+
+mid.1<-fix.full.1[fix.full.1$position==4,]
+mean.height.2012.2<-mean(mid.1$height,na.rm=TRUE)
+mean.weight.2012.2<-mean(mid.1$weight,na.rm=TRUE)
+mean.age.2012.2<-mean(mid.1$age,na.rm=TRUE)
+mid.1[is.na(mid.1$height),3]<-mean.height.2012.2
+mid.1[is.na(mid.1$weight),4]<-mean.weight.2012.2
+mid.1[is.na(mid.1$age),5]<-mean.age.2012.2
+
+##merge all the cleaned data
+fix.merge.2012<-rbind.fill(defender.1,forward.1,goal.1,mid.1)
+##put features as rate by minute
+byminutes.data.1<-fix.merge.2012[,c(15,17:34)]/fix.merge.2012$mins_played
+##put the rate into the new dataset
+fix.merge.2012.1<-cbind(fix.merge.2012[1:14],fix.merge.2012$mins_played,byminutes.data.1)
+colnames(fix.merge.2012.1)[15]<-"mins_played"
+gbm.predict.2<-predict(gbm.1,fix.merge.2012.1)
+gbm.data.2<-data.frame(fix.merge.2012.1[,c(1:length(fix.merge.2012.1)-1)],gbm.predict.2)
