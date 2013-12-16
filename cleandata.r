@@ -84,8 +84,6 @@ k<-kmeans(fix.merge.1[,c(2:5,15:(length(fix.merge)))],centers=4,algorithm="Lloyd
 ##not popular cluster
 notpopular.1<-as.data.frame(fix.merge.1[k$cluster==4,1])
 
-
-
 notpopular.1<-as.data.frame(fix.merge.1[k$cluster==4,1])
 colnames(notpopular.1)<-"not"
 write.csv(notpopular.1,file="notpop.csv")
@@ -103,15 +101,9 @@ test<-rbind.fill(test.1,test.2)
 colnames(train)[15]<-"mins_played"
 colnames(test)[15]<-"mins_played"
 
-
 library(randomForest)
 rf<-randomForest(top~position+height+weight+age+mins_played+num_touches+num_touches_2st_third+num_appearances+num_touches_3st_third+num_tackles_attempted+num_shots+num_touches_1st_third+num_fouls_conceded+num_fouls_won+num_yellow_cards+num_aerial_successes+num_headed_shots+num_aerial_duels+num_headed_on_target+num_shots_on_target+num_goals+num_penalties_scored+num_red_cards+num_set_play_goals,data=train)
  pred<-predict(rf,newdata=test)
- 
- 
- 
- 
- 
  
  ##look at data fo random forest test
 test.3<-data.frame(test[,c(1:length(fix.merge.1)-1)],pred)
@@ -126,7 +118,6 @@ pred.1<-predict(rf,newdata=new.test)
 pred.3<-data.frame(new.test[,c(1:length(fix.merge.1)-1)],pred.1)
 colnames(pred.3)[35]<-'top'
 ggplot(pred.3,aes(x=mins_played,y=num_shots,color=top))+geom_point()+scale_colour_gradientn(colours=rainbow(2))
- 
  
 ##look at cluster and change values for players that were wrongly identified 
 k.1<-kmeans(pred.3[,c(2:5,15:(length(pred.3)))],centers=4,algorithm="Lloyd")
@@ -150,9 +141,7 @@ gbm.predict.1<-predict(gbm.1,new.test)
 gbm.data.1<-data.frame(new.test[,c(1:length(fix.merge.1)-1)],gbm.predict.1)
 
 
-
 ##predict on 2013 data and clean the data
-
 twotwo.2013<-read.csv("98_2013_features.csv")
 twotwo.2013$position= as.character(twotwo.2013$position)
 twotwo.2013$position [ twotwo.2013$position  == "Defender" ] <- "1"
@@ -208,7 +197,7 @@ byminutes.data.1<-fix.merge.2013[,c(15,17:34)]/fix.merge.2013$mins_played
 fix.merge.2013.1<-cbind(fix.merge.2013[1:14],fix.merge.2013$mins_played,byminutes.data.1)
 colnames(fix.merge.2013.1)[15]<-"mins_played"
 
-
+## predict data and show order of popularity metric
 gbm.predict.2<-predict(gbm.1,fix.merge.2013.1)
 gbm.data.2<-data.frame(fix.merge.2013.1[,c(1:length(fix.merge.2013.1)-1)],gbm.predict.2)
 top.order<-order(gbm.data.2[,34],decreasing=T)
