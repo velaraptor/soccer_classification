@@ -86,22 +86,47 @@ plot(1:15, wss, type="b", xlab="Number of Clusters",ylab="Within groups sum of s
 ## FOR THIS DATA 6 was the best one, look at when it bends
 ##THE CENTER MIGHT BE DIFFERENT FOR THIS, I PUT SIX, noticed with the 2010 data, that it is optimal near 6-8 clusters
 set.seed(25)
-k<-kmeans(fix.merge.1[,c(2:5,15:(length(fix.merge)))],,centers=7)
+k<-kmeans(fix.merge.1[,c(2:5,15:(length(fix.merge)))],centers=7,algorithm="Lloyd")
 k
-notpopular<-fix.merge.1[k$cluster==2,1]
 
-##to check where the 'popular' people are based on top data
-fix.merge.1[k$cluster==1,35]
-fix.merge.1[k$cluster==2,35]
-fix.merge.1[k$cluster==3,35]
+notpopular.1<-as.data.frame(fix.merge.1[k$cluster==4,1])
+colnames(notpopular.1)<-"not"
+write.csv(notpopular.1,file="notpop.csv")
 
-
-
-##so read file
-write.csv(notpopular,"notpopular.csv")
-
-## for 2nd time
-not<-read.csv("notpopular.csv")
-fix.merge.1[not,35]<-0
-##figure out how to subset data with 0 and 1s, and create a model, ridge, randomforest
-
+nottop<-read.csv("notpop.csv")
+fix.merge.1[fix.merge.1$full_name %in% nottop[,2],35]<-0
+colnames(fix.merge.1)[35]<-"top"
+train.1<-fix.merge.1[fix.merge.1$full_name %in% nottop[,2],]
+train.2<-fix.merge.1[fix.merge.1$full_name %in% top,]
+train<-rbind.fill(train.1,train.2)
+fix.merge.2<-fix.merge.1[,1:(length(fix.merge.1)-1)]
+test.1<-fix.merge.2[!fix.merge.1$full_name %in% nottop[,2],]
+test.2<-fix.merge.2[!fix.merge.1$full_name %in% top,]
+test<-rbind.fill(test.1,test.2)
+colnames(train)[15]<-"mins_played"
+colnames(test)[15]<-"mins_played"
+library(randomForest)
+rf<-randomForest(top~position+height+weight+age+mins_played+num_touches+num_touches_2st_third+num_appearances+num_touches_3st_third+num_tackles_attempted+num_shots+num_touches_1st_third+num_fouls_conceded+num_fouls_won+num_yellow_cards+num_aerial_successes+num_headed_shots+num_aerial_duels+num_headed_on_target+num_shots_on_target+num_goals+num_penalties_scored+num_red_cards+num_set_play_goals,data=train)
+ pred<-predict(rf,newdata=test)
+ 
+test.3<-data.frame(test[,c(1:length(fix.merge.1)-1)],pred)
+colnames(test.3)[35]<-'top'
+check<-rbind.fill(train,test.3)
+ggplot(check,aes(x=mins_played.1,y=num_touches,color=top))+geom_point()
+ 
+ 
+test.again<-train[,1:(length(fix.merge.1)-1)]
+new.test<-rbind.fill(test.again,test)
+pred.1<-predict(rf,newdata=new.test)
+pred.3<-data.frame(new.test[,c(1:length(fix.merge.1)-1)],pred.1)
+colnames(pred.3)[35]<-'top'
+ggplot(check.1,aes(x=mins_played,y=num_touches,color=top))+geom_point()
+ggplot(pred.3,aes(x=mins_played,y=num_shots,color=top))+geom_point()+scale_colour_gradientn(colours=rainbow(2))
+k.1<-kmeans(pred.3[,c(2:5,15:(length(pred.3)))],centers=4,algorithm="Lloyd")
+ 
+ 
+k.1<-kmeans(pred.3[,c(2:5,15:(length(pred.3)))],centers=4,algorithm="Lloyd")
+##change cluster 3 score to .75
+##use cluster 4 score
+##use orginal train for 0
+##and fix cluster with top player to 1 and then train the data, and test it, then test for other seasons based on this metric 
